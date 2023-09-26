@@ -50,7 +50,7 @@ if ( ! function_exists( 'wp_new_user_notification' ) ) {
 	 * @since 4.3.0 The `$plaintext_pass` parameter was changed to `$notify`.
 	 * @since 4.3.1 The `$plaintext_pass` parameter was deprecated. `$notify` added as a third parameter.
 	 */
-	function wp_new_user_notification( $user_id, $deprecated = null, $notify = '' ) {
+	function wp_new_user_notification( int $user_id, $deprecated = null, string $notify = '' ) {
 		if ( null !== $deprecated ) {
 			_deprecated_argument( __FUNCTION__, '4.3.1' );
 		}
@@ -145,6 +145,15 @@ if ( ! function_exists( 'wp_new_user_notification' ) ) {
 			return;
 		}
 
+		if ( ! empty( get_option( 'bf_new_user_notification' ) ) ) {
+			$message = get_option( 'bf_new_user_notification' );
+
+			if ( str_contains( $message, '[username]' ) ) {
+				$message = str_replace( '[username]', $user->user_login, $message );
+			}
+
+		}
+
 		$key = get_password_reset_key( $user );
 		if ( is_wp_error( $key ) ) {
 			return;
@@ -152,12 +161,11 @@ if ( ! function_exists( 'wp_new_user_notification' ) ) {
 
 		$switched_locale = switch_to_user_locale( $user_id );
 
-		/* translators: %s: User login. */
-		$message = sprintf( __( 'Username: %s' ), $user->user_login ) . "\r\n\r\n";
-		$message .= __( 'To set your password, visit the following address:' ) . "\r\n\r\n";
-		$message .= network_site_url( "wp-login.php?action=rp&key=$key&login=" . rawurlencode( $user->user_login ), 'login' ) . "\r\n\r\n";
+//		$message .= network_site_url( "wp-login.php?action=rp&key=$key&login=" . rawurlencode( $user->user_login ), 'login' ) . "\r\n\r\n";
 
-		$message .= wp_login_url() . "\r\n";
+		if ( str_contains( $message, '[password_url]' ) ) {
+			$message = str_replace( '[password_url]', network_site_url( "wp-login.php?action=rp&key=$key&login=" . rawurlencode( $user->user_login ), 'login' ) . "\r\n\r\n", $message );
+		}
 
 		$wp_new_user_notification_email = array(
 			'to'      => $user->user_email,
