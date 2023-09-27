@@ -1,7 +1,7 @@
 <?php
 
 class BFDashboardSetup {
-	public $capability = 'manage_options';
+	public string $capability = 'manage_options';
 
 	public function init(): void {
 		add_action( 'admin_menu', array( $this, 'register_options_page' ) );
@@ -33,7 +33,7 @@ class BFDashboardSetup {
 			exit;
 		}
 
-		load_template( BF_NEW_USER_NOTIFICATION_PATH . 'templates/admin/main.php' );
+		load_template( BF_NEW_USER_NOTIFICATION_PATH . 'templates/main.php' );
 	}
 
 	public function add_settings_link( array $links ): array {
